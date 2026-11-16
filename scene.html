@@ -5,53 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>СПИНТЕХ — лабораторная №3</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <style>
-      .controls {
-        position: fixed;
-        z-index: 10;
-        bottom: 24px;
-        left: 0;
-        right: 0;
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-      }
-      button {
-        padding: 12px 16px;
-        font: inherit;
-      }
-    </style>
   </head>
   <body>
-    <a-scene background="color: #e8eef4" vr-mode-ui="enabled: false">
+    <a-scene background="color: #e8eef4">
       <a-assets>
         <a-asset-item id="lab-model" src="./lab3.glb"></a-asset-item>
       </a-assets>
 
-      <a-entity id="exhibit" gltf-model="#lab-model"></a-entity>
+      <a-entity gltf-model="#lab-model"></a-entity>
 
-      <a-light type="ambient" intensity="0.8"></a-light>
-      <a-light type="directional" intensity="0.9" position="-3 5 4"></a-light>
+      <a-light type="ambient" intensity="1.2"></a-light>
+      <a-light type="directional" intensity="1.5" position="-2 3 5"></a-light>
 
-      <a-entity camera position="0 1.6 4.5" rotation="-15 0 0"></a-entity>
+      <a-entity position="0 1.6 4.5" rotation="-15 0 0">
+        <a-entity camera look-controls></a-entity>
+      </a-entity>
     </a-scene>
-
-    <div class="controls">
-      <button id="left">← Повернуть</button>
-      <button id="right">Повернуть →</button>
-    </div>
-
-    <script>
-      const exhibit = document.querySelector('#exhibit');
-      let angle = 0;
-
-      function turn(degrees) {
-        angle += degrees;
-        exhibit.setAttribute('rotation', { x: 0, y: angle, z: 0 });
-      }
-
-      document.querySelector('#left').addEventListener('click', () => turn(-30));
-      document.querySelector('#right').addEventListener('click', () => turn(30));
-    </script>
   </body>
 </html>
