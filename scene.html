@@ -1,25 +1,64 @@
 <!doctype html>
 <html lang="ru">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>СПИНТЕХ — лабораторная №3</title>
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-  </head>
-  <body>
-    <a-scene background="color: #e8eef4">
-      <a-assets>
-        <a-asset-item id="lab-model" src="./lab3.glb"></a-asset-item>
-      </a-assets>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>СПИНТЕХ — лабораторная №3</title>
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script>
+    const THREE = AFRAME.THREE;
 
-      <a-entity gltf-model="#lab-model"></a-entity>
+    AFRAME.registerComponent('orbit-model', {
+      schema: { type: 'selector' },
 
-      <a-light type="ambient" intensity="1.2"></a-light>
-      <a-light type="directional" intensity="1.5" position="-2 3 5"></a-light>
+      init() {
+        this.bounds = new THREE.Sphere();
+        this.direction = new THREE.Vector3();
 
-      <a-entity position="0 1.6 4.5" rotation="-15 0 0">
-        <a-entity camera look-controls></a-entity>
-      </a-entity>
-    </a-scene>
-  </body>
+        const updateBounds = () => {
+          const mesh = this.data.getObject3D('mesh');
+          if (!mesh) return;
+
+          const box = new THREE.Box3().setFromObject(mesh);
+          if (!box.isEmpty()) box.getBoundingSphere(this.bounds);
+        };
+
+        this.data.addEventListener('model-loaded', updateBounds);
+        updateBounds();
+      },
+
+      tick() {
+        const camera = this.el.getObject3D('camera');
+        if (!camera || this.bounds.radius <= 0) return;
+
+        const vertical = THREE.MathUtils.degToRad(camera.fov / 2);
+        const horizontal = Math.atan(Math.tan(vertical) * camera.aspect);
+        const distance = 1.08 * this.bounds.radius /
+          Math.sin(Math.min(vertical, horizontal));
+
+        camera.getWorldDirection(this.direction);
+        this.el.object3D.position.copy(this.bounds.center)
+          .addScaledVector(this.direction, -distance);
+      }
+    });
+  </script>
+</head>
+<body>
+  <a-scene background="color: #e8eef4"
+           renderer="colorManagement: true"
+           vr-mode-ui="enabled: false">
+    <a-assets>
+      <a-asset-item id="lab-model" src="./lab3.glb"></a-asset-item>
+    </a-assets>
+
+    <a-entity id="exhibit" gltf-model="#lab-model"></a-entity>
+
+    <a-light type="hemisphere" color="#ffffff"
+             ground-color="#d9d9d9" intensity="1.15"></a-light>
+    <a-light type="directional" intensity="1.0" position="-2 4 5"></a-light>
+    <a-light type="directional" intensity="0.45" position="3 2 -4"></a-light>
+
+    <a-entity camera="fov: 55" look-controls orbit-model="#exhibit"></a-entity>
+  </a-scene>
+</body>
 </html>
